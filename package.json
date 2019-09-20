@@ -7,9 +7,21 @@
     "vue-template-compiler": "^2.6.10"
   },
   "dependencies": {
+    "@types/js-yaml": "^3.12.1",
+    "@types/node": "^12.7.4",
+    "@types/node-fetch": "^2.5.0",
+    "@types/ws": "^6.0.3",
+    "js-yaml": "^3.13.1",
+    "node-fetch": "^2.6.0",
     "node-gyp": "^5.0.3",
     "vue": "^2.6.10",
     "vue-hot-reload-api": "^2.3.3",
-    "vue-property-decorator": "^8.2.2"
+    "vue-property-decorator": "^8.2.2",
+    "ws": "^7.1.2"
+  },
+  "scripts": {
+    "build": "tsc src/server.ts",
+    "start": "parcel src/index.html",
+    "serve": "npm run build && node src/server.js"
   }
 }

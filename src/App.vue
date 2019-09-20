@@ -1,30 +1,47 @@
 <template>
   <div>
-    <PrinterTile
-      v-for="printer in printers"
-      :key="printer.address"
-      v-bind="printer"
+    <PrinterCard
+      v-for="(status, name) in printers"
+      :key="name"
+      :name="name"
+      :status="status"
     >
-    </PrinterTile>
+    </PrinterCard>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
 
-import PrinterTile from './PrinterTile.vue';
+import * as messages from './messages';
+import * as octoprint from './octoprint';
+import PrinterCard from './PrinterCard.vue';
 
-@Component({ components: { PrinterTile } })
+@Component({ components: { PrinterCard } })
 export default class App extends Vue {
-  printers = [
-    {
-      address: 'http://octopi.local:5000/',
-      apikey: 'BEF073DD42A64431BDD72D83FA563DF5',
-    },
-    {
-      address: 'http://octopi.local:5000/',
-      apikey: 'BEF073DD42A64431BDD72D83FA563DF5',
-    },
-  ];
+  websocket!: WebSocket;
+  printers: {
+    [key: string]: octoprint.CurrentOrHistoryPayload | null;
+  } = {};
+
+  mounted() {
+    let loc = window.location;
+    // TODO: make dynamic
+    // const ws_uri: string = loc.protocol === 'https' ? 'wss://' : 'ws://' + loc.host + '/ws';
+    const ws_uri = 'ws://localhost:4321';
+    this.websocket = new WebSocket(ws_uri);
+    this.websocket.onmessage = (ev: MessageEvent) => {
+      const event: messages.ExtendedMessage = JSON.parse(ev.data as string);
+      console.log(event);
+
+      if ('init' in event) {
+        this.$set(this.printers, event.printer, null);
+      } else if ('current' in event) {
+        this.$set(this.printers, event.printer, event.current);
+      } else if ('history' in event) {
+        this.$set(this.printers, event.printer, event.history);
+      }
+    };
+  }
 }
 </script>

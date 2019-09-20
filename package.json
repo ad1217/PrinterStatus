@@ -1,6 +1,8 @@
 {
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@types/express": "^4.17.1",
+    "@types/http-proxy": "^1.17.0",
     "@vue/component-compiler-utils": "^3.0.0",
     "sass": "^1.23.0-module.beta.1",
     "typescript": "^3.6.2",
@@ -10,10 +12,14 @@
     "@types/js-yaml": "^3.12.1",
     "@types/node": "^12.7.4",
     "@types/node-fetch": "^2.5.0",
+    "@types/parcel-bundler": "^1.12.1",
     "@types/ws": "^6.0.3",
+    "express": "^4.17.1",
+    "http-proxy": "^1.18.0",
     "js-yaml": "^3.13.1",
     "node-fetch": "^2.6.0",
     "node-gyp": "^5.0.3",
+    "parcel-bundler": "^1.12.3",
     "vue": "^2.6.10",
     "vue-hot-reload-api": "^2.3.3",
     "vue-property-decorator": "^8.2.2",
@@ -21,7 +27,6 @@
   },
   "scripts": {
     "build": "tsc src/server.ts",
-    "start": "parcel src/index.html",
     "serve": "npm run build && node src/server.js"
   }
 }

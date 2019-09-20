@@ -1,17 +1,23 @@
 import * as fs from 'fs';
 import * as url from 'url';
+import * as path from 'path';
 
+import * as express from 'express';
 import fetch from 'node-fetch';
-import * as messages from './messages';
-import * as octoprint from './octoprint';
+import * as httpProxy from 'http-proxy';
 import * as WebSocket from 'ws';
 import * as yaml from 'js-yaml';
+import * as Bundler from 'parcel-bundler';
+
+import * as messages from './messages';
+import * as octoprint from './octoprint';
 
 // Load config
 const config: {
   printers: { address: string; apikey: string }[];
 } = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'));
 
+const proxy = httpProxy.createProxyServer({});
 const proxyServer = new WebSocket.Server({ host: '127.0.0.1', port: 4321 });
 let printerStatuses: PrinterStatus[] = [];
 
@@ -26,6 +32,22 @@ function broadcast(data: WebSocket.Data) {
 function broadcastPayload(payload: messages.ExtendedMessage) {
   broadcast(JSON.stringify(payload));
 }
+
+const app = express();
+
+app.get('/webcam/:printer', (req, res) => {
+  let printer: PrinterStatus | undefined = printerStatuses.find(
+    p => p.name === req.params.printer
+  );
+  if (printer && printer.webcamURL)
+    proxy.web(req, res, { target: printer.webcamURL });
+  else res.status(404).send('Not Found: Printer not known or has no webcam.');
+});
+
+let bundler = new Bundler(path.join(__dirname, 'index.html'));
+app.use(bundler.middleware());
+
+app.listen(1234);
 
 class PrinterStatus {
   wss: WebSocket.Server;

@@ -1,9 +1,11 @@
 <template>
   <div class="card">
     <div class="card-header">{{ name || 'Unknown' }}</div>
-    <div v-if="webcamURL">
-      <img class="webcam" :src="webcamURL" />
-    </div>
+    <img
+      v-if="name"
+      class="webcam"
+      :src="'http://localhost:1234/webcam/' + name"
+    />
     <div v-if="status">
       <div>{{ status.state.text }}</div>
       <div>Job File Name: {{ status.job.file.name || 'None' }}</div>
@@ -30,10 +32,7 @@ import * as octoprint from './octoprint';
 @Component
 export default class PrinterCard extends Vue {
   @Prop(String) readonly name!: string;
-  @Prop(String) readonly webcamURL!: string;
   @Prop(Object) readonly status?: octoprint.CurrentOrHistoryPayload;
-
-  mounted() {}
 }
 </script>
 
@@ -52,9 +51,10 @@ export default class PrinterCard extends Vue {
     text-align: center;
     padding-bottom: 0.25em;
   }
-}
 
-.webcam {
-  max-width: 100%;
+  .webcam {
+    width: 480px;
+    max-width: 100%;
+  }
 }
 </style>

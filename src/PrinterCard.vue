@@ -1,11 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header">{{ name || 'Unknown' }}</div>
-    <img
-      v-if="name"
-      class="webcam"
-      :src="'http://localhost:1234/webcam/' + name"
-    />
+    <img v-if="name" class="webcam" :src="'/webcam/' + name" />
     <div v-if="status">
       <div>{{ status.state.text }}</div>
       <div>Job File Name: {{ status.job.file.name || 'None' }}</div>

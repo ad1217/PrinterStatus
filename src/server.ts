@@ -8,6 +8,7 @@ import * as httpProxy from 'http-proxy';
 import * as WebSocket from 'ws';
 import * as yaml from 'js-yaml';
 import * as Bundler from 'parcel-bundler';
+import * as expressWs from 'express-ws';
 
 import * as messages from './messages';
 import * as octoprint from './octoprint';
@@ -18,11 +19,10 @@ const config: {
 } = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'));
 
 const proxy = httpProxy.createProxyServer({});
-const proxyServer = new WebSocket.Server({ host: '127.0.0.1', port: 4321 });
 let printerStatuses: PrinterStatus[] = [];
 
 function broadcast(data: WebSocket.Data) {
-  proxyServer.clients.forEach((client: WebSocket) => {
+  wsInstance.getWss().clients.forEach((client: WebSocket) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(data);
     }
@@ -33,7 +33,12 @@ function broadcastPayload(payload: messages.ExtendedMessage) {
   broadcast(JSON.stringify(payload));
 }
 
-const app = express();
+const wsInstance = expressWs(express());
+const app = wsInstance.app;
+
+app.ws('/ws', function(ws, req) {
+  printerStatuses.forEach((ps: PrinterStatus) => ps.send_init(ws));
+});
 
 app.get('/webcam/:printer', (req, res) => {
   let printer: PrinterStatus | undefined = printerStatuses.find(
@@ -50,7 +55,6 @@ app.use(bundler.middleware());
 app.listen(1234);
 
 class PrinterStatus {
-  wss: WebSocket.Server;
   address: string;
   apikey: string;
 
@@ -60,8 +64,7 @@ class PrinterStatus {
   websocket?: WebSocket;
   lastStatus?: messages.ExtendedMessage;
 
-  constructor(wss: WebSocket.Server, address: string, apikey: string) {
-    this.wss = wss;
+  constructor(address: string, apikey: string) {
     this.address = address;
     this.apikey = apikey;
 
@@ -140,14 +143,10 @@ class PrinterStatus {
   }
 }
 
-function init_printers() {
+function initPrinters() {
   printerStatuses = config.printers.map(
-    printer => new PrinterStatus(proxyServer, printer.address, printer.apikey)
+    printer => new PrinterStatus(printer.address, printer.apikey)
   );
 }
 
-init_printers();
-
-proxyServer.on('connection', (ws: WebSocket) => {
-  printerStatuses.forEach((ps: PrinterStatus) => ps.send_init(ws));
-});
+initPrinters();

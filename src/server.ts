@@ -19,6 +19,10 @@ const config: {
 } = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'));
 
 const proxy = httpProxy.createProxyServer({});
+proxy.on('error', function(e) {
+  console.error('Proxy failed:');
+  console.error(e);
+});
 let printerStatuses: PrinterStatus[] = [];
 
 function broadcast(data: WebSocket.Data) {

@@ -48,7 +48,7 @@ app.get('/webcam/:printer', (req, res) => {
   let printer: PrinterStatus | undefined = printerStatuses.find(
     p => p.name === req.params.printer
   );
-  if (printer && printer.webcamURL) {
+  if (printer?.webcamURL) {
     req.url = ''; // truncate the url for passing to the proxy
     proxy.web(req, res, { target: printer.webcamURL });
   } else res.status(404).send('Not Found: Printer not known or has no webcam.');
@@ -84,6 +84,9 @@ class PrinterStatus {
     // TODO: error handling (try/catch)
     const settings = await this.api_get('settings');
     this.webcamURL = settings.webcam.streamUrl;
+    if (this.webcamURL?.startsWith('/')) {
+      this.webcamURL = this.address + this.webcamURL;
+    }
     this.name = settings.appearance.name;
 
     // do passive login to get a session key from the API key

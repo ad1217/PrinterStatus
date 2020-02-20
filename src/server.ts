@@ -13,6 +13,8 @@ import * as expressWs from 'express-ws';
 import * as messages from './messages';
 import * as octoprint from './octoprint';
 
+const PORT = process.env.PORT || 1234;
+
 // Load config
 const config: {
   printers: { address: string; apikey: string }[];
@@ -57,7 +59,7 @@ app.get('/webcam/:printer', (req, res) => {
 let bundler = new Bundler(path.join(__dirname, 'index.html'));
 app.use(bundler.middleware());
 
-app.listen(1234);
+app.listen(PORT);
 
 class PrinterStatus {
   address: string;

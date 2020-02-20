@@ -107,7 +107,6 @@ class PrinterStatus {
       })
       .on('message', (data: WebSocket.Data) => {
         const event: octoprint.Message = JSON.parse(data as string);
-        console.log(event);
 
         let ext_event: messages.ExtendedMessage = {
           ...event,
@@ -143,7 +142,6 @@ class PrinterStatus {
 
   send_init(ws: WebSocket) {
     let payload: messages.ExtendedMessage;
-    console.log(this.lastStatus);
     if (this.lastStatus) {
       payload = this.lastStatus;
     } else {

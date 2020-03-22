@@ -21,7 +21,7 @@ const config: {
 } = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'));
 
 const proxy = httpProxy.createProxyServer({});
-proxy.on('error', function(e) {
+proxy.on('error', function (e) {
   console.error('Proxy failed:');
   console.error(e);
 });
@@ -42,13 +42,13 @@ function broadcastPayload(payload: messages.ExtendedMessage) {
 const wsInstance = expressWs(express());
 const app = wsInstance.app;
 
-app.ws('/ws', function(ws, req) {
+app.ws('/ws', function (ws, req) {
   printerStatuses.forEach((ps: PrinterStatus) => ps.send_init(ws));
 });
 
 app.get('/webcam/:printer', (req, res) => {
   let printer: PrinterStatus | undefined = printerStatuses.find(
-    p => p.name === req.params.printer
+    (p) => p.name === req.params.printer
   );
   if (printer?.webcamURL) {
     req.url = ''; // truncate the url for passing to the proxy
@@ -153,7 +153,7 @@ class PrinterStatus {
 
 function initPrinters() {
   printerStatuses = config.printers.map(
-    printer => new PrinterStatus(printer.address, printer.apikey)
+    (printer) => new PrinterStatus(printer.address, printer.apikey)
   );
 }
 

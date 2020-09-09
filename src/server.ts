@@ -15,10 +15,12 @@ import * as octoprint from './octoprint';
 
 const PORT = process.env.PORT || 1234;
 
+type configuration = { printers: { address: string; apikey: string }[] };
+
 // Load config
-const config: {
-  printers: { address: string; apikey: string }[];
-} = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'));
+const config: configuration = yaml.safeLoad(
+  fs.readFileSync('config.yaml', 'utf8')
+) as configuration;
 
 const proxy = httpProxy.createProxyServer({});
 proxy.on('error', function (e) {

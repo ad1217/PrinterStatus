@@ -27,7 +27,7 @@ export default class App extends Vue {
   mounted() {
     let loc = window.location;
     const ws_uri: string =
-      loc.protocol === 'https' ? 'wss://' : 'ws://' + loc.host + '/ws';
+      (loc.protocol === 'https:' ? 'wss://' : 'ws://') + loc.host + '/ws';
     this.websocket = new WebSocket(ws_uri);
     this.websocket.onmessage = (ev: MessageEvent) => {
       const event: messages.ExtendedMessage = JSON.parse(ev.data as string);

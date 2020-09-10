@@ -1,0 +1,13 @@
+[Unit]
+Description=A Read-only viewer for multiple OctoPrint instances
+
+[Service]
+Environment=PORT=8881
+ExecStart=/usr/bin/npm start
+WorkingDirectory=/var/www/PrinterStatus
+Restart=always
+RestartSec=10
+User=www-data
+
+[Install]
+WantedBy=multi-user.target

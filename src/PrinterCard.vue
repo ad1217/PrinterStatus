@@ -5,17 +5,16 @@
     <div v-if="status">
       <div>{{ status.state.text }}</div>
       <div>Job File Name: {{ status.job.file.name || 'None' }}</div>
-      <div>
-        Job Completion:
-        {{ status.progress.completion }}%
-        <progress
-          v-if="status.progress.completion"
-          :value="status.progress.completion"
-          max="100"
-        >
-          {{ status.progress.completion }}%
-        </progress>
-        <span v-else> - </span>
+      <div v-if="status.progress.completion">
+        <div>
+          Job Completion:
+          {{ status.progress.completion.toFixed(2) }}%
+          <progress :value="status.progress.completion" max="100"></progress>
+        </div>
+        <div>
+          Job Time: {{ formatDuration(status.progress.printTime) }} elapsed,
+          {{ formatDuration(status.progress.printTimeLeft) }} left
+        </div>
       </div>
       <div>User: {{ status.job.user || '-' }}</div>
     </div>
@@ -24,6 +23,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
+import prettyMilliseconds from 'pretty-ms';
 
 import * as octoprint from './octoprint';
 
@@ -31,6 +31,10 @@ import * as octoprint from './octoprint';
 export default class PrinterCard extends Vue {
   @Prop(String) readonly name!: string;
   @Prop(Object) readonly status?: octoprint.CurrentOrHistoryPayload;
+
+  formatDuration(seconds: number): string {
+    return prettyMilliseconds(seconds * 1000);
+  }
 }
 </script>
 

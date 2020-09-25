@@ -7,11 +7,13 @@
       <div>Job File Name: {{ status.job.file.name || 'None' }}</div>
       <div>
         Job Completion:
+        {{ status.progress.completion }}%
         <progress
           v-if="status.progress.completion"
           :value="status.progress.completion"
+          max="100"
         >
-          {{ status.progress.completion }}
+          {{ status.progress.completion }}%
         </progress>
         <span v-else> - </span>
       </div>

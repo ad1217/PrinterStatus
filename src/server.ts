@@ -98,14 +98,16 @@ class PrinterStatus {
       passive: 'true',
     });
 
+    this.connect_websocket(login.name + ':' + login.session);
+  }
+
+  connect_websocket(authToken: string): void {
     this.websocket = new WebSocket(
       url.resolve(this.address, '/sockjs/websocket')
     );
     this.websocket
       .on('open', () => {
-        this.websocket!.send(
-          JSON.stringify({ auth: login.name + ':' + login.session })
-        );
+        this.websocket!.send(JSON.stringify({ auth: authToken }));
       })
       .on('message', (data: WebSocket.Data) => {
         const event: octoprint.Message = JSON.parse(data as string);
@@ -119,6 +121,10 @@ class PrinterStatus {
         if ('current' in event || 'history' in event) {
           this.lastStatus = ext_event;
         }
+      })
+      .on('close', () => {
+        console.log('Lost connection to ' + this.name + ' reconnecting...');
+        setTimeout(() => this.connect_websocket(authToken), 5000);
       });
   }
 

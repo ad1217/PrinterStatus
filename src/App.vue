@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div class="loading" v-show="Object.keys(printers).length === 0">
+      <div class="loading-spinner"></div>
+    </div>
     <PrinterCard
       v-for="(status, name) in printers"
       :key="name"
@@ -54,3 +57,30 @@ export default class App extends Vue {
   }
 }
 </script>
+
+<style>
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 90vh;
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.loading-spinner {
+  display: block;
+  height: 10vh;
+  width: 10vh;
+  border: solid 1vh transparent;
+  border-top-color: #1c87c9;
+  border-radius: 50%;
+  animation: 2s linear infinite spinner;
+}
+</style>

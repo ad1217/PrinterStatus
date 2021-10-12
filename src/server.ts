@@ -54,7 +54,7 @@ app.get('/webcam/:printer', (req, res) => {
   );
   if (printer?.webcamURL) {
     req.url = ''; // truncate the url for passing to the proxy
-    proxy.web(req, res, { target: printer.webcamURL });
+    proxy.web(req, res, { target: printer.webcamURL.toString() });
   } else res.status(404).send('Not Found: Printer not known or has no webcam.');
 });
 
@@ -67,7 +67,7 @@ class PrinterStatus {
   address: string;
   apikey: string;
 
-  webcamURL?: string;
+  webcamURL?: URL;
   name?: string;
 
   websocket?: WebSocket;
@@ -87,10 +87,7 @@ class PrinterStatus {
   async init() {
     // TODO: error handling (try/catch)
     const settings = await this.api_get('settings');
-    this.webcamURL = settings.webcam.streamUrl;
-    if (this.webcamURL?.startsWith('/')) {
-      this.webcamURL = this.address + this.webcamURL;
-    }
+    this.webcamURL = new URL(settings.webcam.streamUrl, this.address);
     this.name = settings.appearance.name;
 
     // do passive login to get a session key from the API key
@@ -102,9 +99,9 @@ class PrinterStatus {
   }
 
   connect_websocket(authToken: string): void {
-    this.websocket = new WebSocket(
-      url.resolve(this.address, '/sockjs/websocket')
-    );
+    const url = new URL('/sockjs/websocket', this.address)
+    url.protocol = 'ws';
+    this.websocket = new WebSocket(url.toString());
     this.websocket
       .on('open', () => {
         this.websocket!.send(JSON.stringify({ auth: authToken }));
@@ -129,14 +126,14 @@ class PrinterStatus {
   }
 
   async api_get(endpoint: string): Promise<any> {
-    const r = await fetch(url.resolve(this.address, '/api/' + endpoint), {
+    const r = await fetch(new URL('/api/' + endpoint, this.address), {
       headers: { 'X-Api-Key': this.apikey },
     });
     return await r.json();
   }
 
   async api_post(endpoint: string, data: any): Promise<any> {
-    const r = await fetch(url.resolve(this.address, '/api/' + endpoint), {
+    const r = await fetch(new URL('/api/' + endpoint, this.address), {
       headers: {
         'X-Api-Key': this.apikey,
         Accept: 'application/json',

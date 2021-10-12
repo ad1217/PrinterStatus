@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 1234;
 type configuration = { printers: { address: string; apikey: string }[] };
 
 // Load config
-const config: configuration = yaml.safeLoad(
+const config: configuration = yaml.load(
   fs.readFileSync('config.yaml', 'utf8')
 ) as configuration;
 

@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header">{{ name || 'Unknown' }}</div>
-    <img v-if="name" class="webcam" :src="'/webcam/' + name" />
+    <img class="webcam" :src="'/webcam/' + name" />
     <div v-if="status">
       <div>{{ status.state.text }}</div>
       <div>Job File Name: {{ status.job.file.name || 'None' }}</div>
@@ -21,20 +21,18 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator';
+<script setup lang="ts">
 import prettyMilliseconds from 'pretty-ms';
 
-import * as octoprint from './octoprint';
+import * as octoprint from '../types/octoprint';
 
-@Component
-export default class PrinterCard extends Vue {
-  @Prop(String) readonly name!: string;
-  @Prop(Object) readonly status?: octoprint.CurrentOrHistoryPayload;
+defineProps<{
+  name: string;
+  status: octoprint.CurrentOrHistoryPayload | null;
+}>();
 
-  formatDuration(seconds: number): string {
-    return prettyMilliseconds(seconds * 1000);
-  }
+function formatDuration(seconds: number): string {
+  return prettyMilliseconds(seconds * 1000);
 }
 </script>
 

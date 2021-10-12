@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as url from 'url';
 import * as path from 'path';
 
 import * as express from 'express';
@@ -7,11 +6,10 @@ import fetch from 'node-fetch';
 import * as httpProxy from 'http-proxy';
 import * as WebSocket from 'ws';
 import * as yaml from 'js-yaml';
-import * as Bundler from 'parcel-bundler';
 import * as expressWs from 'express-ws';
 
-import * as messages from './messages';
-import * as octoprint from './octoprint';
+import * as messages from '../types/messages';
+import * as octoprint from '../types/octoprint';
 
 const PORT = process.env.PORT || 1234;
 
@@ -57,9 +55,6 @@ app.get('/webcam/:printer', (req, res) => {
     proxy.web(req, res, { target: printer.webcamURL.toString() });
   } else res.status(404).send('Not Found: Printer not known or has no webcam.');
 });
-
-let bundler = new Bundler(path.join(__dirname, 'index.html'));
-app.use(bundler.middleware());
 
 app.listen(PORT);
 

@@ -1,5 +1,6 @@
 /.cache/
 /dist/
-/node_modules/
+node_modules/
 /src/*.js
-/config.yaml
+/server/config.yaml
+/.log/

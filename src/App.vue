@@ -5,9 +5,10 @@
     </div>
     <PrinterCard
       v-else
-      v-for="(status, name) in printers"
-      :key="name"
-      :name="name as string"
+      v-for="({ name, status }, slug) in printers"
+      :key="slug"
+      :slug="slug as string"
+      :name="name"
       :status="status"
     >
     </PrinterCard>
@@ -22,7 +23,10 @@ import * as octoprint from '../types/octoprint';
 import PrinterCard from './PrinterCard.vue';
 
 const printers: Ref<{
-  [key: string]: octoprint.CurrentOrHistoryPayload | null;
+  [key: string]: {
+    name?: string;
+    status: octoprint.CurrentOrHistoryPayload | null;
+  };
 }> = ref({});
 const hasPrinters = computed(() => Object.keys(printers.value).length > 0);
 
@@ -37,12 +41,17 @@ function connectWebsocket() {
     const event: messages.ExtendedMessage = JSON.parse(ev.data as string);
     console.log(event);
 
+    if (!(event.printer in printers.value)) {
+      printers.value[event.printer] = { status: null };
+    }
+    printers.value[event.printer].name = event.name;
+
     if ('init' in event) {
-      printers.value[event.printer] = null;
-    } else if ('current' in event) {
-      printers.value[event.printer] = event.current!;
-    } else if ('history' in event) {
-      printers.value[event.printer] = event.history!;
+      printers.value[event.printer].status = null;
+    } else if ('current' in event && event.current) {
+      printers.value[event.printer].status = event.current;
+    } else if ('history' in event && event.history) {
+      printers.value[event.printer].status = event.history;
     } else if ('remote_ws_status' in event) {
     }
   });

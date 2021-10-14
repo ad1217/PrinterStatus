@@ -13,7 +13,11 @@ import * as octoprint from '../types/octoprint';
 
 const PORT = process.env.PORT || 1234;
 
-type configuration = { printers: { address: string; apikey: string }[] };
+type configuration = {
+  printers: {
+    [key: string]: { address: string; apikey: string }
+  }
+};
 
 // Load config
 const config: configuration = yaml.load(
@@ -48,7 +52,7 @@ app.ws('/ws', function (ws, req) {
 
 app.get('/webcam/:printer', (req, res) => {
   let printer: PrinterStatus | undefined = printerStatuses.find(
-    (p) => p.name === req.params.printer
+    (p) => p.slug === req.params.printer
   );
   if (printer?.webcamURL) {
     req.url = ''; // truncate the url for passing to the proxy
@@ -59,6 +63,7 @@ app.get('/webcam/:printer', (req, res) => {
 app.listen(PORT);
 
 class PrinterStatus {
+  slug: string;
   address: string;
   apikey: string;
 
@@ -68,7 +73,8 @@ class PrinterStatus {
   websocket?: WebSocket;
   lastStatus?: messages.ExtendedMessage;
 
-  constructor(address: string, apikey: string) {
+  constructor(slug: string, address: string, apikey: string) {
+    this.slug = slug;
     this.address = address;
     this.apikey = apikey;
 
@@ -106,7 +112,8 @@ class PrinterStatus {
 
         let ext_event: messages.ExtendedMessage = {
           ...event,
-          printer: this.name!,
+          printer: this.slug,
+          name: this.name,
         };
         broadcastPayload(ext_event);
 
@@ -115,7 +122,7 @@ class PrinterStatus {
         }
       })
       .on('close', () => {
-        console.log('Lost connection to ' + this.name + ' reconnecting...');
+        console.log('Lost connection to ' + this.slug + ' reconnecting...');
         setTimeout(() => this.connect_websocket(authToken), 5000);
       });
   }
@@ -145,15 +152,15 @@ class PrinterStatus {
     if (this.lastStatus) {
       payload = this.lastStatus;
     } else {
-      payload = { init: null, printer: this.name! };
+      payload = { init: null, printer: this.slug, name: this.name };
     }
     ws.send(JSON.stringify(payload));
   }
 }
 
 function initPrinters() {
-  printerStatuses = config.printers.map(
-    (printer) => new PrinterStatus(printer.address, printer.apikey)
+  printerStatuses = Object.entries(config.printers).map(
+    ([slug, printer]) => new PrinterStatus(slug, printer.address, printer.apikey)
   );
 }
 

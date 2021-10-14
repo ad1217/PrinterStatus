@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header">{{ name || 'Unknown' }}</div>
-    <img class="webcam" :src="'/webcam/' + name" />
+    <img class="webcam" :src="'/webcam/' + slug" />
     <div v-if="status">
       <div>{{ status.state.text }}</div>
       <div>Job File Name: {{ status.job.file.name || 'None' }}</div>
@@ -27,7 +27,8 @@ import prettyMilliseconds from 'pretty-ms';
 import * as octoprint from '../types/octoprint';
 
 defineProps<{
-  name: string;
+  slug: string;
+  name?: string;
   status: octoprint.CurrentOrHistoryPayload | null;
 }>();
 

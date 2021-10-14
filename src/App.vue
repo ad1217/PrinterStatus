@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="content">
     <div v-if="!hasPrinters">
       <div class="loading-spinner"></div>
     </div>
@@ -66,6 +66,13 @@ connectWebsocket();
 </script>
 
 <style>
+.content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .loading {
   display: flex;
   align-items: center;

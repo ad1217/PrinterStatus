@@ -13,6 +13,10 @@ import * as octoprint from '../types/octoprint';
 
 const PORT = process.env.PORT || 1234;
 
+const PING_TIME = 10000;
+
+type Timeout = ReturnType<typeof setTimeout>;
+
 type configuration = {
   printers: {
     [key: string]: { address: string; apikey: string };
@@ -69,9 +73,6 @@ class PrinterStatus {
 
   webcamURL?: URL;
   name?: string;
-  session_key?: string;
-
-  websocket?: WebSocket;
   lastStatus?: messages.ExtendedMessage;
 
   constructor(slug: string, address: string, apikey: string) {
@@ -79,42 +80,43 @@ class PrinterStatus {
     this.address = address;
     this.apikey = apikey;
 
-    // async init
+    this.try_connect_websocket();
+  }
+
+  try_connect_websocket() {
     this.connect_websocket().catch((e) => {
-      console.error('Failed to initialize "${this.slug}"');
-      throw e;
+      console.error(
+        `Failed to connect to "${this.slug}", attempting reconnection in 5 seconds`
+      );
+      console.error(e);
+      setTimeout(() => this.try_connect_websocket(), 5000);
     });
   }
 
   async connect_websocket() {
-    // initial setup
-    if (!this.session_key) {
-      try {
-        const settings = await this.api_get('settings');
-        this.webcamURL = new URL(settings.webcam.streamUrl, this.address);
-        this.name = settings.appearance.name;
+    const settings = await this.api_get('settings');
+    this.webcamURL = new URL(settings.webcam.streamUrl, this.address);
+    this.name = settings.appearance.name;
 
-        // do passive login to get a session key from the API key
-        const login: octoprint.LoginResponse = await this.api_post('login', {
-          passive: 'true',
-        });
-        this.session_key = login.name + ':' + login.session;
-      } catch {
-        console.log(
-          `Failed to connect to "${this.slug}" attempting reconnection in 5 seconds`
-        );
-        setTimeout(() => this.connect_websocket(), 5000);
-        return;
-      }
-    }
+    // do passive login to get a session key from the API key
+    const login: octoprint.LoginResponse = await this.api_post('login', {
+      passive: 'true',
+    });
+    const session_key = login.name + ':' + login.session;
+
+    let pingSender: ReturnType<typeof setInterval>;
+    let pongTimeout: Timeout;
 
     const url = new URL('/sockjs/websocket', this.address);
     url.protocol = 'ws';
-    this.websocket = new WebSocket(url.toString());
-    this.websocket
+    let websocket = new WebSocket(url.toString());
+    websocket
       .on('open', () => {
+        pingSender = setInterval(() => websocket.ping(), PING_TIME);
+        pongTimeout = this.heartbeat(websocket, pongTimeout);
+
         console.log(`Connected to "${this.slug}"`);
-        this.websocket!.send(JSON.stringify({ auth: this.session_key }));
+        websocket.send(JSON.stringify({ auth: session_key }));
       })
       .on('message', (data: WebSocket.Data) => {
         const event: octoprint.Message = JSON.parse(data as string);
@@ -130,12 +132,26 @@ class PrinterStatus {
           this.lastStatus = ext_event;
         }
       })
+      .on('pong', () => {
+        pongTimeout = this.heartbeat(websocket, pongTimeout);
+      })
       .on('close', () => {
+        clearInterval(pingSender);
+        clearTimeout(pongTimeout);
+
         console.log(
-          `Lost connection to "${this.slug}" attempting reconnection in 5 seconds`
+          `Lost connection to "${this.slug}", attempting reconnection in 5 seconds`
         );
-        setTimeout(() => this.connect_websocket(), 5000);
+        setTimeout(() => this.try_connect_websocket(), 5000);
       });
+  }
+
+  heartbeat(websocket: WebSocket, pongTimeout: Timeout): Timeout {
+    clearTimeout(pongTimeout);
+    return setTimeout(() => {
+      console.log(`Missed 2 heartbeats for "${this.slug}", disconnecting`);
+      websocket.terminate();
+    }, PING_TIME * 2);
   }
 
   async api_get(endpoint: string): Promise<any> {

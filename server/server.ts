@@ -69,6 +69,7 @@ class PrinterStatus {
 
   webcamURL?: URL;
   name?: string;
+  session_key?: string;
 
   websocket?: WebSocket;
   lastStatus?: messages.ExtendedMessage;
@@ -78,34 +79,42 @@ class PrinterStatus {
     this.address = address;
     this.apikey = apikey;
 
-    try {
-      this.init(); // async init
-    } catch (e) {
-      throw 'Failed to Init' + e;
-    }
-  }
-
-  async init() {
-    // TODO: error handling (try/catch)
-    const settings = await this.api_get('settings');
-    this.webcamURL = new URL(settings.webcam.streamUrl, this.address);
-    this.name = settings.appearance.name;
-
-    // do passive login to get a session key from the API key
-    const login: octoprint.LoginResponse = await this.api_post('login', {
-      passive: 'true',
+    // async init
+    this.connect_websocket().catch((e) => {
+      console.error('Failed to initialize "${this.slug}"');
+      throw e;
     });
-
-    this.connect_websocket(login.name + ':' + login.session);
   }
 
-  connect_websocket(authToken: string): void {
+  async connect_websocket() {
+    // initial setup
+    if (!this.session_key) {
+      try {
+        const settings = await this.api_get('settings');
+        this.webcamURL = new URL(settings.webcam.streamUrl, this.address);
+        this.name = settings.appearance.name;
+
+        // do passive login to get a session key from the API key
+        const login: octoprint.LoginResponse = await this.api_post('login', {
+          passive: 'true',
+        });
+        this.session_key = login.name + ':' + login.session;
+      } catch {
+        console.log(
+          `Failed to connect to "${this.slug}" attempting reconnection in 5 seconds`
+        );
+        setTimeout(() => this.connect_websocket(), 5000);
+        return;
+      }
+    }
+
     const url = new URL('/sockjs/websocket', this.address);
     url.protocol = 'ws';
     this.websocket = new WebSocket(url.toString());
     this.websocket
       .on('open', () => {
-        this.websocket!.send(JSON.stringify({ auth: authToken }));
+        console.log(`Connected to "${this.slug}"`);
+        this.websocket!.send(JSON.stringify({ auth: this.session_key }));
       })
       .on('message', (data: WebSocket.Data) => {
         const event: octoprint.Message = JSON.parse(data as string);
@@ -122,8 +131,10 @@ class PrinterStatus {
         }
       })
       .on('close', () => {
-        console.log('Lost connection to ' + this.slug + ' reconnecting...');
-        setTimeout(() => this.connect_websocket(authToken), 5000);
+        console.log(
+          `Lost connection to "${this.slug}" attempting reconnection in 5 seconds`
+        );
+        setTimeout(() => this.connect_websocket(), 5000);
       });
   }
 

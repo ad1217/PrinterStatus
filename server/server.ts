@@ -15,8 +15,8 @@ const PORT = process.env.PORT || 1234;
 
 type configuration = {
   printers: {
-    [key: string]: { address: string; apikey: string }
-  }
+    [key: string]: { address: string; apikey: string };
+  };
 };
 
 // Load config
@@ -100,7 +100,7 @@ class PrinterStatus {
   }
 
   connect_websocket(authToken: string): void {
-    const url = new URL('/sockjs/websocket', this.address)
+    const url = new URL('/sockjs/websocket', this.address);
     url.protocol = 'ws';
     this.websocket = new WebSocket(url.toString());
     this.websocket
@@ -160,7 +160,8 @@ class PrinterStatus {
 
 function initPrinters() {
   printerStatuses = Object.entries(config.printers).map(
-    ([slug, printer]) => new PrinterStatus(slug, printer.address, printer.apikey)
+    ([slug, printer]) =>
+      new PrinterStatus(slug, printer.address, printer.apikey)
   );
 }
 

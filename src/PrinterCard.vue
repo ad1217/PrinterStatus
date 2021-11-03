@@ -1,7 +1,7 @@
 <template>
   <div class="card">
-    <div class="card-header">{{ name || 'Unknown' }}</div>
-    <img class="webcam" :src="'/webcam/' + slug" />
+    <h3 class="card-header">{{ name || 'Unknown' }}</h3>
+    <img class="card-img webcam" :src="'/webcam/' + slug" />
     <div v-if="status">
       <div>{{ status.state.text }}</div>
       <div>Job File Name: {{ status.job.file.name || 'None' }}</div>
@@ -36,26 +36,3 @@ function formatDuration(seconds: number): string {
   return prettyMilliseconds(seconds * 1000);
 }
 </script>
-
-<style lang="scss">
-.card {
-  display: inline-block;
-  margin: 1em;
-  padding: 1em;
-  border-radius: 3px;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 1px -2px,
-    rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px;
-
-  .card-header {
-    font-weight: bold;
-    font-size: 1.5em;
-    text-align: center;
-    padding-bottom: 0.25em;
-  }
-
-  .webcam {
-    width: 480px;
-    max-width: 100%;
-  }
-}
-</style>

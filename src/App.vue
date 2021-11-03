@@ -1,17 +1,28 @@
 <template>
-  <div class="content">
-    <div v-if="!hasPrinters">
-      <div class="loading-spinner"></div>
-    </div>
-    <PrinterCard
-      v-else
-      v-for="({ name, status }, slug) in printers"
-      :key="slug"
-      :slug="slug as string"
-      :name="name"
-      :status="status"
+  <div>
+    <div
+      class="d-flex align-items-center justify-content-center"
+      style="height: 100vh"
+      v-if="!hasPrinters"
     >
-    </PrinterCard>
+      <div class="spinner-border" style="width: 7vw; height: 7vw" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    <div
+      v-else
+      class="
+        row row-cols-1 row-cols-md-2 row-cols-xxl-3
+        m-1 m-md-3
+        g-4
+        justify-content-center
+      "
+    >
+      <div class="col" v-for="({ name, status }, slug) in printers" :key="slug">
+        <PrinterCard :slug="slug as string" :name="name" :status="status">
+        </PrinterCard>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -64,37 +75,3 @@ function connectWebsocket() {
 
 connectWebsocket();
 </script>
-
-<style>
-.content {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 90vh;
-}
-
-@keyframes spinner {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-.loading-spinner {
-  display: block;
-  height: 10vh;
-  width: 10vh;
-  border: solid 1vh transparent;
-  border-top-color: #1c87c9;
-  border-radius: 50%;
-  animation: 2s linear infinite spinner;
-}
-</style>

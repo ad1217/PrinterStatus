@@ -1,5 +1,7 @@
 import * as WebSocket from 'ws';
 import fetch from 'node-fetch';
+/// <reference path="mjpeg-proxy.d.ts"/>
+import { MjpegProxy } from 'mjpeg-proxy';
 
 import {ExtendedMessage} from '../../types/messages';
 import * as octoprint from '../../types/octoprint';
@@ -9,8 +11,8 @@ const PING_TIME = 10000;
 type Timeout = ReturnType<typeof setTimeout>;
 
 export default class OctoprintConnection {
-  public webcamURL?: URL;
   public name?: string;
+  public webcamProxy?: MjpegProxy;
   protected lastStatus?: ExtendedMessage;
 
   constructor(
@@ -34,7 +36,11 @@ export default class OctoprintConnection {
 
   async connect_websocket() {
     const settings = await this.api_get('settings');
-    this.webcamURL = new URL(settings.webcam.streamUrl, this.address);
+    const webcamURL = new URL(settings.webcam.streamUrl, this.address);
+    // TODO: handle recreating proxy on URL change
+    if (this.webcamProxy === undefined) {
+      this.webcamProxy = new MjpegProxy(webcamURL.toString());
+    }
     this.name = settings.appearance.name;
 
     // do passive login to get a session key from the API key

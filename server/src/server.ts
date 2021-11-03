@@ -6,7 +6,7 @@ import * as yaml from 'js-yaml';
 import * as expressWs from 'express-ws';
 import * as WebSocket from 'ws';
 
-import { ExtendedMessage } from '../types/messages';
+import { ExtendedMessage } from '../../types/messages';
 import OctoPrintConnection from './OctoPrintConnection';
 
 const PORT = process.env.PORT || 1234;

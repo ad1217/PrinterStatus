@@ -1,8 +1,8 @@
 import * as WebSocket from 'ws';
 import fetch from 'node-fetch';
 
-import {ExtendedMessage} from '../types/messages';
-import * as octoprint from '../types/octoprint';
+import {ExtendedMessage} from '../../types/messages';
+import * as octoprint from '../../types/octoprint';
 
 const PING_TIME = 10000;
 

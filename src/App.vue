@@ -18,8 +18,8 @@
         justify-content-center
       "
     >
-      <div class="col" v-for="({ name, status }, slug) in printers" :key="slug">
-        <PrinterCard :slug="slug as string" :name="name" :status="status">
+      <div class="col" v-for="(printer, slug) in printers" :key="slug">
+        <PrinterCard :slug="slug as string" v-bind="printer" :now="now">
         </PrinterCard>
       </div>
     </div>
@@ -36,10 +36,14 @@ import PrinterCard from './PrinterCard.vue';
 const printers: Ref<{
   [key: string]: {
     name?: string;
+    lastUpdate: Date;
     status: octoprint.CurrentOrHistoryPayload | null;
   };
 }> = ref({});
 const hasPrinters = computed(() => Object.keys(printers.value).length > 0);
+
+let now: Ref<Date> = ref(new Date());
+setInterval(() => (now.value = new Date()), 1000);
 
 let websocket!: WebSocket;
 
@@ -53,9 +57,10 @@ function connectWebsocket() {
     console.log(event);
 
     if (!(event.printer in printers.value)) {
-      printers.value[event.printer] = { status: null };
+      printers.value[event.printer] = { status: null, lastUpdate: new Date() };
     }
     printers.value[event.printer].name = event.name;
+    printers.value[event.printer].lastUpdate = new Date();
 
     if ('init' in event) {
       printers.value[event.printer].status = null;

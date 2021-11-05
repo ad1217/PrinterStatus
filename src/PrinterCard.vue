@@ -35,8 +35,10 @@
           </div>
         </div>
         <div>
-          Job Time: {{ formatDuration(status.progress.printTime) }} elapsed,
-          {{ formatDuration(status.progress.printTimeLeft) }} left
+          Job Time: {{ formatDuration(status.progress.printTime) }} elapsed<span
+            v-show="status.progress.printTimeLeft"
+            >, {{ formatDuration(status.progress.printTimeLeft) }} left
+          </span>
         </div>
       </div>
       <div>User: {{ status.job.user || '-' }}</div>

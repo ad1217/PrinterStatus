@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 /// <reference path="mjpeg-proxy.d.ts"/>
 import { MjpegProxy } from 'mjpeg-proxy';
 
-import {ExtendedMessage} from '../../types/messages';
+import {Message, StatusMessage, SettingsMessage} from '../../types/messages';
 import * as octoprint from '../../types/octoprint';
 
 const PING_TIME = 10000;
@@ -13,13 +13,14 @@ type Timeout = ReturnType<typeof setTimeout>;
 export default class OctoprintConnection {
   public name?: string;
   public webcamProxy?: MjpegProxy;
-  protected lastStatus?: ExtendedMessage;
+  protected lastStatus?: StatusMessage;
+  protected settingsMessage?: SettingsMessage;
 
   constructor(
     public slug: string,
     public address: string,
     protected apikey: string,
-    protected broadcast: (msg: ExtendedMessage) => void
+    protected broadcast: (msg: Message) => void
   ) {
     this.try_connect_websocket();
   }
@@ -41,7 +42,18 @@ export default class OctoprintConnection {
     if (this.webcamProxy === undefined) {
       this.webcamProxy = new MjpegProxy(webcamURL.toString());
     }
-    this.name = settings.appearance.name;
+    this.settingsMessage = {
+      kind: "settings",
+      printer: this.slug,
+      name: settings.appearance.name,
+      color: settings.appearance.color,
+      webcam: {
+        flipH: settings.webcam.flipH,
+        flipV: settings.webcam.flipV,
+        rotate90: settings.webcam.rotate90,
+      }
+    }
+    this.broadcast(this.settingsMessage);
 
     // do passive login to get a session key from the API key
     const login: octoprint.LoginResponse = await this.api_post('login', {
@@ -66,10 +78,10 @@ export default class OctoprintConnection {
       .on('message', (data: WebSocket.Data) => {
         const event: octoprint.Message = JSON.parse(data as string);
 
-        let ext_event: ExtendedMessage = {
-          ...event,
+        let ext_event: StatusMessage = {
+          kind: "status",
           printer: this.slug,
-          name: this.name,
+          msg: event,
         };
         this.broadcast(ext_event);
 
@@ -120,12 +132,12 @@ export default class OctoprintConnection {
   }
 
   send_init(ws: WebSocket) {
-    let payload: ExtendedMessage;
-    if (this.lastStatus) {
-      payload = this.lastStatus;
-    } else {
-      payload = { init: null, printer: this.slug, name: this.name };
+    if (this.settingsMessage) {
+      ws.send(JSON.stringify(this.settingsMessage));
+
+      if (this.lastStatus) {
+        ws.send(JSON.stringify(this.lastStatus));
+      }
     }
-    ws.send(JSON.stringify(payload));
   }
 }

@@ -5,7 +5,7 @@ import * as yaml from 'js-yaml';
 import * as expressWs from 'express-ws';
 import * as WebSocket from 'ws';
 
-import { ExtendedMessage } from '../../types/messages';
+import { Message } from '../../types/messages';
 import OctoPrintConnection from './OctoPrintConnection';
 
 const PORT = process.env.PORT || 1234;
@@ -31,7 +31,7 @@ function broadcast(data: WebSocket.Data) {
   });
 }
 
-function broadcastPayload(payload: ExtendedMessage) {
+function broadcastPayload(payload: Message) {
   broadcast(JSON.stringify(payload));
 }
 

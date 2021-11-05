@@ -29,17 +29,10 @@
 <script setup lang="ts">
 import { computed, ref, Ref } from 'vue';
 
-import * as messages from '../types/messages';
-import * as octoprint from '../types/octoprint';
-import PrinterCard from './PrinterCard.vue';
+import { Message, WebcamSettings } from '../types/messages';
+import PrinterCard, { PrinterInfo } from './PrinterCard.vue';
 
-const printers: Ref<{
-  [key: string]: {
-    name?: string;
-    lastUpdate: Date;
-    status: octoprint.CurrentOrHistoryPayload | null;
-  };
-}> = ref({});
+const printers: Ref<{ [key: string]: PrinterInfo }> = ref({});
 const hasPrinters = computed(() => Object.keys(printers.value).length > 0);
 
 let now: Ref<Date> = ref(new Date());
@@ -53,22 +46,30 @@ function connectWebsocket() {
     (loc.protocol === 'https:' ? 'wss://' : 'ws://') + loc.host + '/ws';
   websocket = new WebSocket(ws_uri);
   websocket.addEventListener('message', (ev: MessageEvent) => {
-    const event: messages.ExtendedMessage = JSON.parse(ev.data as string);
+    const event: Message = JSON.parse(ev.data as string);
     console.log(event);
 
     if (!(event.printer in printers.value)) {
-      printers.value[event.printer] = { status: null, lastUpdate: new Date() };
+      printers.value[event.printer] = {
+        status: null,
+        webcam: null,
+        color: null,
+        lastUpdate: new Date(),
+      };
     }
-    printers.value[event.printer].name = event.name;
     printers.value[event.printer].lastUpdate = new Date();
 
-    if ('init' in event) {
-      printers.value[event.printer].status = null;
-    } else if ('current' in event && event.current) {
-      printers.value[event.printer].status = event.current;
-    } else if ('history' in event && event.history) {
-      printers.value[event.printer].status = event.history;
-    } else if ('remote_ws_status' in event) {
+    if (event.kind === 'settings') {
+      printers.value[event.printer].name = event.name;
+      printers.value[event.printer].webcam = event.webcam;
+      printers.value[event.printer].color = event.color;
+    } else if (event.kind === 'status') {
+      if ('current' in event.msg && event.msg.current) {
+        printers.value[event.printer].status = event.msg.current;
+      } else if ('history' in event.msg && event.msg.history) {
+        printers.value[event.printer].status = event.msg.history;
+      } else if ('remote_ws_status' in event.msg) {
+      }
     }
   });
 

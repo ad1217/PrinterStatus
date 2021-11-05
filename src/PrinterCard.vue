@@ -12,10 +12,24 @@
       <div>{{ status.state.text }}</div>
       <div>Job File Name: {{ status.job.file.name || 'None' }}</div>
       <div v-if="status.progress.completion">
-        <div>
+        <div class="d-flex">
           Job Completion:
-          {{ status.progress.completion.toFixed(2) }}%
-          <progress :value="status.progress.completion" max="100"></progress>
+          <div class="progress flex-fill ms-2" style="height: 2em">
+            <div
+              class="progress-bar"
+              :class="{
+                'progress-bar-striped': status.state.flags.printing,
+                'progress-bar-animated': status.state.flags.printing,
+              }"
+              role="progressbar"
+              :style="{ width: status.progress.completion + '%' }"
+              :aria-valuenow="status.progress.completion.toFixed(2)"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              {{ status.progress.completion.toFixed(2) }}%
+            </div>
+          </div>
         </div>
         <div>
           Job Time: {{ formatDuration(status.progress.printTime) }} elapsed,

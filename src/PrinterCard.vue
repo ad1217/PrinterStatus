@@ -10,7 +10,10 @@
     />
     <div class="card-body" v-if="status">
       <div>{{ status.state.text }}</div>
-      <div>Job File Name: {{ status.job.file.name || 'None' }}</div>
+      <div>
+        Job File Name:
+        <span class="font-monospace">{{ status.job.file.name || 'None' }}</span>
+      </div>
       <div v-if="status.progress.completion">
         <div class="d-flex">
           Job Completion:

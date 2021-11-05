@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card h-100">
     <h3 class="card-header" :data-color="color">
       {{ name || 'Unknown' }}
     </h3>

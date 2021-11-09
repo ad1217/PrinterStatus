@@ -42,12 +42,51 @@ app.ws('/ws', function (ws, req) {
   octoprintConnections.forEach((op: OctoPrintConnection) => op.send_init(ws));
 });
 
-app.get('/webcam/:printer', (req, res) => {
-  let printer: OctoPrintConnection | undefined = octoprintConnections.find(
+app.get('/webcam/:printer.m3u8', (req, res) => {
+  const printer: OctoPrintConnection | undefined = octoprintConnections.find(
     (op) => op.slug === req.params.printer
   );
-  if (printer?.webcamProxy) {
-    return printer.webcamProxy.proxyRequest(req, res);
+
+  if (printer?.webcamStream) {
+    if (printer.webcamStream.m3u8) {
+      res.writeHead(200, { 'Content-Type': 'application/vnd.apple.mpegurl' });
+      res.end(printer.webcamStream.m3u8.replace(/(.*\.m4s)/g, '/webcam/$1'));
+    } else {
+      res.set('Retry-After', '1.0');
+      res.status(503).send('m3u8 not ready');
+    }
+  } else res.status(404).send('Not Found: Printer not known or has no webcam.');
+});
+
+app.get('/webcam/init-:printer.mp4', (req, res) => {
+  const printer: OctoPrintConnection | undefined = octoprintConnections.find(
+    (op) => op.slug === req.params.printer
+  );
+
+  if (printer?.webcamStream) {
+    if (printer.webcamStream.initialization) {
+      res.writeHead(200, { 'Content-Type': 'video/mp4' });
+      res.end(printer.webcamStream.initialization);
+    } else {
+      res.set('Retry-After', '4.0');
+      res.status(503).send('initialization not ready');
+    }
+  } else res.status(404).send('Not Found: Printer not known or has no webcam.');
+});
+
+app.get('/webcam/:printer([^\\d]+):id(\\d+).m4s', (req, res) => {
+  const printer: OctoPrintConnection | undefined = octoprintConnections.find(
+    (op) => op.slug === req.params.printer
+  );
+
+  if (printer?.webcamStream) {
+    const segment = printer.webcamStream.getSegment(req.params.id);
+    if (segment) {
+      res.writeHead(200, { 'Content-Type': 'video/mp4' });
+      res.end(segment);
+    } else {
+      res.sendStatus(503);
+    }
   } else res.status(404).send('Not Found: Printer not known or has no webcam.');
 });
 

@@ -3,11 +3,12 @@
     <h3 class="card-header" :data-color="color">
       {{ name || 'Unknown' }}
     </h3>
-    <img
+    <video
+      muted
       class="card-img webcam"
+      ref="video"
       :style="webcamTransform"
-      :src="'/webcam/' + slug"
-    />
+    ></video>
     <div class="card-body" v-if="status">
       <div>{{ status.state.text }}</div>
       <div>
@@ -48,7 +49,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import Hls from 'hls.js';
+import { computed, onMounted, Ref, ref, watchEffect } from 'vue';
 import prettyMilliseconds from 'pretty-ms';
 
 import { CurrentOrHistoryPayload } from '../types/octoprint';
@@ -67,6 +69,33 @@ interface Props {
 export type PrinterInfo = Omit<Props, 'slug' | 'now'>;
 
 const props = defineProps<Props>();
+const video: Ref<HTMLMediaElement | null> = ref(null);
+
+const hls: Ref<Hls | null> = ref(null);
+
+if (Hls.isSupported()) {
+  hls.value = new Hls({
+    liveDurationInfinity: true,
+    backBufferLength: 30,
+    manifestLoadingTimeOut: 1000,
+    manifestLoadingMaxRetry: 30,
+    manifestLoadingRetryDelay: 500,
+    //debug: true,
+  });
+  hls.value.on(Hls.Events.MEDIA_ATTACHED, () => {
+    hls.value!.loadSource(`/webcam/${props.slug}.m3u8`);
+    hls.value!.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+      video.value?.play();
+      console.log(
+        'manifest loaded, found ' + data.levels.length + ' quality level'
+      );
+    });
+  });
+
+  hls.value.on(Hls.Events.ERROR, (event, data) => {
+    console.log(data);
+  });
+}
 
 function formatDuration(seconds: number): string {
   return prettyMilliseconds(seconds * 1000);
@@ -102,6 +131,15 @@ const webcamTransform = computed(() => {
     return { transform: transforms.join(' ') };
   } else {
     return {};
+  }
+});
+
+watchEffect(() => {
+  console.log(video.value, hls.value);
+  if (hls.value && video.value) {
+    // if hls and video element are valid, bind them together
+    hls.value.attachMedia(video.value);
+    console.log('video and hls.js are now bound together !');
   }
 });
 </script>

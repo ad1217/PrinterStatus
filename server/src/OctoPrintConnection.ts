@@ -1,8 +1,8 @@
 import * as WebSocket from 'ws';
 import fetch from 'node-fetch';
-/// <reference path="mjpeg-proxy.d.ts"/>
-import { MjpegProxy } from 'mjpeg-proxy';
+import * as Mp4Frag from 'mp4frag';
 
+import {make_mp4frag} from './camera-stream';
 import {Message, StatusMessage, SettingsMessage} from '../../types/messages';
 import * as octoprint from '../../types/octoprint';
 
@@ -12,7 +12,7 @@ type Timeout = ReturnType<typeof setTimeout>;
 
 export default class OctoprintConnection {
   public name?: string;
-  public webcamProxy?: MjpegProxy;
+  public webcamStream?: Mp4Frag;
   protected lastStatus?: StatusMessage;
   protected settingsMessage?: SettingsMessage;
 
@@ -39,8 +39,8 @@ export default class OctoprintConnection {
     const settings = await this.api_get('settings');
     const webcamURL = new URL(settings.webcam.streamUrl, this.address);
     // TODO: handle recreating proxy on URL change
-    if (this.webcamProxy === undefined) {
-      this.webcamProxy = new MjpegProxy(webcamURL.toString());
+    if (this.webcamStream === undefined) {
+      this.webcamStream = make_mp4frag(this.slug, webcamURL);
     }
     this.settingsMessage = {
       kind: "settings",

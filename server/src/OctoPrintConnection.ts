@@ -40,18 +40,13 @@ export default class OctoprintConnection {
     const webcamURL = new URL(settings.webcam.streamUrl, this.address);
     // TODO: handle recreating proxy on URL change
     if (this.webcamStream === undefined) {
-      this.webcamStream = make_mp4frag(this.slug, webcamURL);
+      this.webcamStream = make_mp4frag(this.slug, webcamURL, settings.webcam);
     }
     this.settingsMessage = {
       kind: "settings",
       printer: this.slug,
       name: settings.appearance.name,
       color: settings.appearance.color,
-      webcam: {
-        flipH: settings.webcam.flipH,
-        flipV: settings.webcam.flipV,
-        rotate90: settings.webcam.rotate90,
-      }
     }
     this.broadcast(this.settingsMessage);
 

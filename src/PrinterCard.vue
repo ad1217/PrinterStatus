@@ -7,7 +7,6 @@
       muted
       class="card-img webcam"
       ref="video"
-      :style="webcamTransform"
     ></video>
     <div class="card-body" v-if="status">
       <div>{{ status.state.text }}</div>
@@ -54,7 +53,7 @@ import { computed, onMounted, Ref, ref, watchEffect } from 'vue';
 import prettyMilliseconds from 'pretty-ms';
 
 import { CurrentOrHistoryPayload } from '../types/octoprint';
-import { WebcamSettings, OctoprintColor } from '../types/messages';
+import { OctoprintColor } from '../types/messages';
 
 interface Props {
   slug: string;
@@ -62,7 +61,6 @@ interface Props {
   lastUpdate: Date;
   now: Date;
   status: CurrentOrHistoryPayload | null;
-  webcam: WebcamSettings | null;
   color: OctoprintColor | null;
 }
 
@@ -116,24 +114,6 @@ const lastUpdateString = computed(() => {
   }
 });
 
-const webcamTransform = computed(() => {
-  if (props.webcam) {
-    const transforms = [];
-    if (props.webcam.flipH) {
-      transforms.push('scaleX(-1)');
-    }
-    if (props.webcam.flipV) {
-      transforms.push('scaleY(-1)');
-    }
-    if (props.webcam.rotate90) {
-      transforms.push('rotate(90)');
-    }
-    return { transform: transforms.join(' ') };
-  } else {
-    return {};
-  }
-});
-
 watchEffect(() => {
   console.log(video.value, hls.value);
   if (hls.value && video.value) {
@@ -170,5 +150,9 @@ $bs-colors: ('red', 'orange', 'yellow', 'green', 'blue', 'white');
   &[data-color='black'] {
     color: var(--bs-light);
   }
+}
+
+.webcam {
+  background-color: black;
 }
 </style>

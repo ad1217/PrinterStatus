@@ -1,7 +1,29 @@
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as Mp4Frag from 'mp4frag';
 
-export function make_mp4frag(slug: string, url: URL | string): Mp4Frag {
+interface WebcamSettings {
+  flipH: boolean;
+  flipV: boolean;
+  rotate90: boolean;
+}
+
+export function make_mp4frag(
+  slug: string,
+  url: URL | string,
+  webcamSettings: WebcamSettings
+): Mp4Frag {
+  let transforms = [];
+  if (webcamSettings.flipH) {
+    transforms.push('hflip');
+  }
+  if (webcamSettings.flipV) {
+    transforms.push('vflip');
+  }
+  if (webcamSettings.rotate90) {
+    transforms.push('transpose=2');
+  }
+  console.log(transforms);
+
   const command = ffmpeg(url.toString())
     .nativeFramerate()
     .inputOptions([
@@ -12,7 +34,9 @@ export function make_mp4frag(slug: string, url: URL | string): Mp4Frag {
     .noAudio()
     .videoCodec('libx264')
     .size('640x480')
+    .autopad()
     .videoFilter('hqdn3d')
+    .videoFilters(transforms)
     .format('mp4')
     .outputOptions([
       '-tune zerolatency',

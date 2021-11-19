@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { computed, ref, Ref } from 'vue';
 
-import { Message, WebcamSettings } from '../types/messages';
+import { Message } from '../types/messages';
 import PrinterCard, { PrinterInfo } from './PrinterCard.vue';
 
 const printers: Ref<{ [key: string]: PrinterInfo }> = ref({});
@@ -52,7 +52,6 @@ function connectWebsocket() {
     if (!(event.printer in printers.value)) {
       printers.value[event.printer] = {
         status: null,
-        webcam: null,
         color: null,
         lastUpdate: new Date(),
       };
@@ -61,7 +60,6 @@ function connectWebsocket() {
 
     if (event.kind === 'settings') {
       printers.value[event.printer].name = event.name;
-      printers.value[event.printer].webcam = event.webcam;
       printers.value[event.printer].color = event.color;
     } else if (event.kind === 'status') {
       if ('current' in event.msg && event.msg.current) {

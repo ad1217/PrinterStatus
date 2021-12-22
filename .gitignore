@@ -4,3 +4,4 @@ node_modules/
 /src/*.js
 /server/config.yaml
 /.log/
+/.pnpm-debug.log

@@ -22,7 +22,6 @@ export function make_mp4frag(
   if (webcamSettings.rotate90) {
     transforms.push('transpose=2');
   }
-  console.log(transforms);
 
   const command = ffmpeg(url.toString())
     .nativeFramerate()

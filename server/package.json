@@ -20,6 +20,7 @@
     "ws": "^8.2.3"
   },
   "scripts": {
-    "start": "ts-node --files ./src/server.ts"
+    "start": "npm run dev",
+    "dev": "ts-node --files ./src/server.ts"
   }
 }

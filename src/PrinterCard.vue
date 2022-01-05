@@ -3,11 +3,7 @@
     <h3 class="card-header" :data-color="color">
       {{ name || 'Unknown' }}
     </h3>
-    <video
-      muted
-      class="card-img webcam"
-      ref="video"
-    ></video>
+    <video muted class="card-img webcam" controls autoplay ref="video"></video>
     <div class="card-body" v-if="status">
       <div>{{ status.state.text }}</div>
       <div>

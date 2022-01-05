@@ -30,7 +30,7 @@ export default class OctoprintConnection {
       console.error(
         `Failed to connect to "${this.slug}", attempting reconnection in 5 seconds`
       );
-      console.error(e);
+      console.error(e.message);
       setTimeout(() => this.try_connect_websocket(), 5000);
     });
   }

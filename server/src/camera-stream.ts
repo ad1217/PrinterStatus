@@ -1,5 +1,8 @@
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as Mp4Frag from 'mp4frag';
+import { PassThrough } from 'stream';
+
+const RECONNECT_TIME = 5000;
 
 interface WebcamSettings {
   flipH: boolean;
@@ -7,11 +10,11 @@ interface WebcamSettings {
   rotate90: boolean;
 }
 
-export function make_mp4frag(
-  slug: string,
+function start_ffmpeg(
   url: URL | string,
-  webcamSettings: WebcamSettings
-): Mp4Frag {
+  webcamSettings: WebcamSettings,
+  mp4frag: Mp4Frag
+) {
   let transforms = [];
   if (webcamSettings.flipH) {
     transforms.push('hflip');
@@ -26,6 +29,7 @@ export function make_mp4frag(
   const command = ffmpeg(url.toString())
     .nativeFramerate()
     .inputOptions([
+      '-timeout 5000000',
       '-probesize 1048576',
       '-analyzeduration 10000000',
       '-use_wallclock_as_timestamps 1',
@@ -48,16 +52,43 @@ export function make_mp4frag(
       '-pix_fmt yuv420p',
       '-movflags +dash+negative_cts_offsets',
     ])
-
-    .on('error', function (err) {
-      console.log('ffmpeg error occurred: ' + err.message);
+    .on('start', function (commandLine) {
+      console.log('Spawned FFmpeg for ' + url.toString());
     });
 
+  let pipe = command.pipe(undefined, { end: false }) as PassThrough;
+  pipe.pipe(mp4frag);
+
+  function reconnect() {
+    start_ffmpeg(url, webcamSettings, mp4frag);
+  }
+
+  command.once('error', (err) => {
+    console.log(
+      `FFmpeg error occurred, reconnecting in ${RECONNECT_TIME}ms: ${err.message}`
+    );
+    pipe.unpipe();
+    command.kill('SIGKILL');
+    setTimeout(() => reconnect(), RECONNECT_TIME);
+  });
+
+  command.once('end', () => {
+    console.log(`FFmpeg stream ended, reconnecting in ${RECONNECT_TIME}ms:`);
+    pipe.unpipe();
+    setTimeout(() => reconnect(), RECONNECT_TIME);
+  });
+}
+
+export function make_mp4frag(
+  slug: string,
+  url: URL | string,
+  webcamSettings: WebcamSettings
+): Mp4Frag {
   const mp4frag = new Mp4Frag({
     hlsPlaylistBase: slug,
   });
 
-  command.pipe(mp4frag);
+  start_ffmpeg(url, webcamSettings, mp4frag);
 
   return mp4frag;
 }

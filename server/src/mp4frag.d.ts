@@ -1,5 +1,5 @@
-declare module "mp4frag" {
-  import { Transform } from "stream";
+declare module 'mp4frag' {
+  import { Transform } from 'stream';
 
   namespace Mp4Frag {
     interface SegmentObject {

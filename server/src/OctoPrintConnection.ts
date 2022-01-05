@@ -2,8 +2,8 @@ import * as WebSocket from 'ws';
 import fetch from 'node-fetch';
 import * as Mp4Frag from 'mp4frag';
 
-import {make_mp4frag} from './camera-stream';
-import {Message, StatusMessage, SettingsMessage} from '../../types/messages';
+import { make_mp4frag } from './camera-stream';
+import { Message, StatusMessage, SettingsMessage } from '../../types/messages';
 import * as octoprint from '../../types/octoprint';
 
 const PING_TIME = 10000;
@@ -43,11 +43,11 @@ export default class OctoprintConnection {
       this.webcamStream = make_mp4frag(this.slug, webcamURL, settings.webcam);
     }
     this.settingsMessage = {
-      kind: "settings",
+      kind: 'settings',
       printer: this.slug,
       name: settings.appearance.name,
       color: settings.appearance.color,
-    }
+    };
     this.broadcast(this.settingsMessage);
 
     // do passive login to get a session key from the API key
@@ -74,7 +74,7 @@ export default class OctoprintConnection {
         const event: octoprint.Message = JSON.parse(data as string);
 
         let ext_event: StatusMessage = {
-          kind: "status",
+          kind: 'status',
           printer: this.slug,
           msg: event,
         };

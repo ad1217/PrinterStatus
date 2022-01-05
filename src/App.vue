@@ -11,12 +11,7 @@
     </div>
     <div
       v-else
-      class="
-        row row-cols-1 row-cols-md-2 row-cols-xxl-3
-        m-1 m-md-3
-        g-4
-        justify-content-center
-      "
+      class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 m-1 m-md-3 g-4 justify-content-center"
     >
       <div class="col" v-for="(printer, slug) in printers" :key="slug">
         <PrinterCard :slug="slug as string" v-bind="printer" :now="now">

@@ -94,6 +94,18 @@ declare module 'mp4frag' {
      */
     get duration(): number;
     /**
+     * - Returns the total duration of all Mp4 segments as a <b>Float</b>(<i>seconds</i>).
+     *
+     * - Returns <b>-1</b> if requested before first [segment event]{@link Mp4Frag#event:segment}.
+     */
+    get totalDuration(): number;
+    /**
+     * - Returns the total byte length of the Mp4 initialization and all Mp4 segments as ant <b>Int</b>(<i>bytes</i>).
+     *
+     * - Returns <b>-1</b> if requested before [initialized event]{@link Mp4Frag#event:initialized}.
+     */
+    get totalByteLength(): number;
+    /**
      * - Returns the fmp4 HLS m3u8 playlist as a <b>String</b>.
      *
      * - Returns <b>Null</b> if requested before [initialized event]{@link Mp4Frag#event:initialized}.
@@ -112,79 +124,22 @@ declare module 'mp4frag' {
      */
     get keyframe(): number;
     /**
+     * - Returns a boolean indicating if all segments contain a keyframe.
+     *
+     * - Returns <b>false</b> if any segments do not contain a keyframe.
+     */
+    get allKeyframes(): boolean;
+    /**
      * - Returns the Mp4 segments as an <b>Array</b> of <b>Objects</b>
      *
      * - <b><code>[{segment, sequence, duration, timestamp, keyframe},...]</code></b>
      *
      * - Returns <b>Null</b> if requested before first [segment event]{@link Mp4Frag#event:segment}.
      */
-    get segmentObjectList(): Mp4Frag.SegmentObject[] | null;
-    /**
-     * @param {Number} [startIndex = -1] - positive or negative starting index for segment search
-     * @param {Boolean} [isKeyframe = true] - indicate if segment should contain keyframe
-     * @param {Number} [count = 1] - stop searching when count is reached
-     * - Returns the Mp4 segments as an <b>Array</b> of <b>Objects</b>
-     *
-     * - Returns <b>Null</b> if requested before first [segment event]{@link Mp4Frag#event:segment}.
-     *
-     * - Returns <b>Null</b> if no segment found when filtered with startIndex and isKeyframe.
-     */
-    getSegmentObjectList(
-      startIndex?: number,
-      isKeyframe?: boolean,
-      count?: number
-    ): Mp4Frag.SegmentObject[] | null;
-    /**
-     * - Returns the Mp4 segments concatenated as a single <b>Buffer</b>.
-     *
-     * - Returns <b>Null</b> if requested before first [segment event]{@link Mp4Frag#event:segment}.
-     */
-    get segmentList(): Buffer | null;
-    /**
-     * @param {Number} [startIndex = -1] - positive or negative starting index for segment search
-     * @param {Boolean} [isKeyframe = true] - indicate if segment should contain keyframe
-     * @param {Number} [count = 1] - stop searching when count is reached
-     * - Returns the Mp4 segments concatenated as a single <b>Buffer</b>.
-     *
-     * - Returns <b>Null</b> if requested before first [segment event]{@link Mp4Frag#event:segment}.
-     *
-     * - Returns <b>Null</b> if no segment found when filtered with startIndex and isKeyframe.
-     */
-    getSegmentList(
-      startIndex?: number,
-      isKeyframe?: boolean,
-      count?: number
-    ): any | null;
-    /**
-     * - Returns the [initialization]{@link Mp4Frag#initialization} and [segmentList]{@link Mp4Frag#segmentList} concatenated as a single <b>Buffer</b>.
-     *
-     * - Returns <b>Null</b> if requested before first [segment event]{@link Mp4Frag#event:segment}.
-     */
-    get buffer(): Buffer | null;
-    /**
-     * @param {Number} [startIndex = -1] - positive or negative starting index for segment search
-     * @param {Boolean} [isKeyframe = true] - indicate if segment should contain keyframe
-     * @param {Number} [count = 1] - stop searching when count is reached
-     * - Returns the [initialization]{@link Mp4Frag#initialization} and [segmentList]{@link Mp4Frag#segmentList} concatenated as a single <b>Buffer</b>.
-     *
-     * - Returns <b>Null</b> if requested before first [segment event]{@link Mp4Frag#event:segment}.
-     *
-     * - Returns <b>Null</b> if no segment found when filtered with startIndex and isKeyframe.
-     */
-    getBuffer(
-      startIndex?: number,
-      isKeyframe?: boolean,
-      count?: number
-    ): Buffer | null;
+    get segmentObjects(): Mp4Frag.SegmentObject[];
     /**
      * @param {Number|String} sequence - sequence number
-     * - Returns the Mp4 segment that corresponds to the numbered sequence as a <b>Buffer</b>.
-     *
-     * - Returns <b>Null</b> if there is no segment that corresponds to sequence number.
-     */
-    getSegment(sequence: number | string): Buffer | null;
-    /**
-     * @param {Number|String} sequence - sequence number
+     * @returns {Object|null}
      * - Returns the Mp4 segment that corresponds to the numbered sequence as an <b>Object</b>.
      *
      * - <b><code>{segment, sequence, duration, timestamp, keyframe}</code></b>
@@ -196,22 +151,5 @@ declare module 'mp4frag' {
      * Clear cached values
      */
     resetCache(): void;
-
-    // TODO: should be able to override event emitter types
-
-    // on(event: string | symbol, listener: (...args: any[]) => void): this;
-    // on(
-    //   event: "initialized",
-    //   listener: (init: {
-    //     mime: String;
-    //     initialization: Buffer;
-    //     m3u8: String;
-    //   }) => void
-    // ): this;
-    // on(event: "reset", listener: () => void): this;
-    // on(
-    //   event: "segment",
-    //   listener: (segmentObject: Mp4Frag.SegmentObject) => void
-    // ): this;
   }
 }

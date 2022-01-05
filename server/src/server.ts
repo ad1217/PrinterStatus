@@ -80,10 +80,10 @@ app.get('/webcam/:printer([^\\d]+):id(\\d+).m4s', (req, res) => {
   );
 
   if (printer?.webcamStream) {
-    const segment = printer.webcamStream.getSegment(req.params.id);
-    if (segment) {
+    const segment_obj = printer.webcamStream.getSegmentObject(req.params.id);
+    if (segment_obj) {
       res.writeHead(200, { 'Content-Type': 'video/mp4' });
-      res.end(segment);
+      res.end(segment_obj.segment);
     } else {
       res.sendStatus(503);
     }

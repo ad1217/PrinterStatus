@@ -21,6 +21,8 @@
   },
   "scripts": {
     "start": "npm run dev",
-    "dev": "ts-node --files ./src/server.ts"
+    "dev": "ts-node --files ./src/server.ts",
+    "build": "tsc",
+    "serve": "node dist/server.js"
   }
 }

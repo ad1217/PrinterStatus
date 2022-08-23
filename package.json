@@ -16,7 +16,7 @@
     "vue": "^3.2.36"
   },
   "scripts": {
-    "start": "pnpm run -r --parallel dev",
+    "start": "pnpm run -r --include-workspace-root --parallel dev",
     "server": "cd server && npm start",
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",

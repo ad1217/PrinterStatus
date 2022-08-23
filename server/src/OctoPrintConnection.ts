@@ -7,6 +7,7 @@ import { Message, StatusMessage, SettingsMessage } from '../../types/messages';
 import * as octoprint from '../../types/octoprint';
 
 const PING_TIME = 10000;
+const STATUS_TIMEOUT = 30000;
 
 type Timeout = ReturnType<typeof setTimeout>;
 
@@ -58,6 +59,7 @@ export default class OctoprintConnection {
 
     let pingSender: ReturnType<typeof setInterval>;
     let pongTimeout: Timeout;
+    let statusTimeout: Timeout;
 
     const url = new URL('/sockjs/websocket', this.address);
     url.protocol = 'ws';
@@ -66,6 +68,14 @@ export default class OctoprintConnection {
       .on('open', () => {
         pingSender = setInterval(() => websocket.ping(), PING_TIME);
         pongTimeout = this.heartbeat(websocket, pongTimeout);
+        statusTimeout = setTimeout(() => {
+          console.log(
+            `No status recieved in ${STATUS_TIMEOUT / 1000}s for "${
+              this.slug
+            }", disconnecting`
+          );
+          websocket.terminate();
+        }, STATUS_TIMEOUT);
 
         console.log(`Connected to "${this.slug}"`);
         websocket.send(JSON.stringify({ auth: session_key }));
@@ -81,6 +91,7 @@ export default class OctoprintConnection {
         this.broadcast(ext_event);
 
         if ('current' in event || 'history' in event) {
+          clearTimeout(statusTimeout);
           this.lastStatus = ext_event;
         }
       })
@@ -90,6 +101,7 @@ export default class OctoprintConnection {
       .on('close', () => {
         clearInterval(pingSender);
         clearTimeout(pongTimeout);
+        clearTimeout(statusTimeout);
 
         console.log(
           `Lost connection to "${this.slug}", attempting reconnection in 5 seconds`

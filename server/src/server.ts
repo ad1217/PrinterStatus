@@ -1,12 +1,12 @@
 import * as fs from 'fs';
 
-import * as express from 'express';
+import express from 'express';
 import * as yaml from 'js-yaml';
-import * as expressWs from 'express-ws';
-import * as WebSocket from 'ws';
+import expressWs from 'express-ws';
+import * as ws from 'ws';
 
-import { Message } from '../../types/messages';
-import OctoPrintConnection from './OctoPrintConnection';
+import { Message } from '../../types/messages.js';
+import OctoPrintConnection from './OctoPrintConnection.js';
 
 const PORT = process.env.PORT || 1234;
 
@@ -23,9 +23,9 @@ const config: configuration = yaml.load(
 
 let octoprintConnections: OctoPrintConnection[] = [];
 
-function broadcast(data: WebSocket.Data) {
-  wsInstance.getWss().clients.forEach((client: WebSocket) => {
-    if (client.readyState === WebSocket.OPEN) {
+function broadcast(data: ws.Data) {
+  wsInstance.getWss().clients.forEach((client: ws.WebSocket) => {
+    if (client.readyState === ws.WebSocket.OPEN) {
       client.send(data);
     }
   });

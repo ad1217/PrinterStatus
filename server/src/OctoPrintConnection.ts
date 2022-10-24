@@ -1,10 +1,14 @@
-import * as WebSocket from 'ws';
+import * as ws from 'ws';
 import fetch from 'node-fetch';
 import * as Mp4Frag from 'mp4frag';
 
-import { make_mp4frag } from './camera-stream';
-import { Message, StatusMessage, SettingsMessage } from '../../types/messages';
-import * as octoprint from '../../types/octoprint';
+import { make_mp4frag } from './camera-stream.js';
+import {
+  Message,
+  StatusMessage,
+  SettingsMessage,
+} from '../../types/messages.js';
+import * as octoprint from '../../types/octoprint.js';
 
 const PING_TIME = 10000;
 const STATUS_TIMEOUT = 30000;
@@ -63,7 +67,7 @@ export default class OctoprintConnection {
 
     const url = new URL('/sockjs/websocket', this.address);
     url.protocol = 'ws';
-    let websocket = new WebSocket(url.toString());
+    let websocket = new ws.WebSocket(url.toString());
     websocket
       .on('open', () => {
         pingSender = setInterval(() => websocket.ping(), PING_TIME);
@@ -80,7 +84,7 @@ export default class OctoprintConnection {
         console.log(`Connected to "${this.slug}"`);
         websocket.send(JSON.stringify({ auth: session_key }));
       })
-      .on('message', (data: WebSocket.Data) => {
+      .on('message', (data: ws.Data) => {
         const event: octoprint.Message = JSON.parse(data as string);
 
         let ext_event: StatusMessage = {
@@ -110,7 +114,7 @@ export default class OctoprintConnection {
       });
   }
 
-  heartbeat(websocket: WebSocket, pongTimeout: Timeout): Timeout {
+  heartbeat(websocket: ws.WebSocket, pongTimeout: Timeout): Timeout {
     clearTimeout(pongTimeout);
     return setTimeout(() => {
       console.log(`Missed 2 heartbeats for "${this.slug}", disconnecting`);
@@ -119,26 +123,32 @@ export default class OctoprintConnection {
   }
 
   async api_get(endpoint: string): Promise<any> {
-    const r = await fetch(new URL('/api/' + endpoint, this.address), {
-      headers: { 'X-Api-Key': this.apikey },
-    });
+    const r = await fetch(
+      new URL('/api/' + endpoint, this.address).toString(),
+      {
+        headers: { 'X-Api-Key': this.apikey },
+      }
+    );
     return await r.json();
   }
 
   async api_post(endpoint: string, data: any): Promise<any> {
-    const r = await fetch(new URL('/api/' + endpoint, this.address), {
-      headers: {
-        'X-Api-Key': this.apikey,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    const r = await fetch(
+      new URL('/api/' + endpoint, this.address).toString(),
+      {
+        headers: {
+          'X-Api-Key': this.apikey,
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
     return await r.json();
   }
 
-  send_init(ws: WebSocket) {
+  send_init(ws: ws.WebSocket) {
     if (this.settingsMessage) {
       ws.send(JSON.stringify(this.settingsMessage));
 

@@ -1,4 +1,4 @@
-import { Message as OctoprintMessage } from './octoprint';
+import { Message as OctoprintMessage } from './octoprint.js';
 
 interface BaseMessage {
   printer: string;

@@ -1,5 +1,5 @@
-import * as ffmpeg from 'fluent-ffmpeg';
-import * as Mp4Frag from 'mp4frag';
+import ffmpeg from 'fluent-ffmpeg';
+import Mp4Frag from 'mp4frag';
 import { PassThrough } from 'stream';
 
 const RECONNECT_TIME = 5000;

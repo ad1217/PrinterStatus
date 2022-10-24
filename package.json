@@ -1,6 +1,7 @@
 {
   "name": "printer_status",
   "version": "0.0.0",
+  "type": "module",
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.1.2",
     "sass": "^1.55.0",
@@ -12,7 +13,7 @@
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^5.2.2",
     "hls.js": "^1.2.4",
-    "pretty-ms": "^7.0.1",
+    "pretty-ms": "^8.0.0",
     "vue": "^3.2.41"
   },
   "scripts": {

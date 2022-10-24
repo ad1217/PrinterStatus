@@ -51,7 +51,7 @@ import prettyMilliseconds from 'pretty-ms';
 import { CurrentOrHistoryPayload } from '../types/octoprint';
 import { OctoprintColor } from '../types/messages';
 
-interface Props {
+export interface Props {
   slug: string;
   name?: string;
   lastUpdate: Date;

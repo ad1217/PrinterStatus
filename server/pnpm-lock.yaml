@@ -5,6 +5,7 @@ specifiers:
   '@types/express-ws': ^3.0.1
   '@types/fluent-ffmpeg': ^2.1.20
   '@types/js-yaml': ^4.0.5
+  '@types/mp4frag': ^0.6.1
   '@types/node': ^18.11.4
   '@types/node-fetch': ^2.6.2
   '@types/ws': ^8.5.3
@@ -32,6 +33,7 @@ devDependencies:
   '@types/express-ws': 3.0.1
   '@types/fluent-ffmpeg': 2.1.20
   '@types/js-yaml': 4.0.5
+  '@types/mp4frag': 0.6.1
   '@types/node': 18.11.4
   '@types/node-fetch': 2.6.2
   '@types/ws': 8.5.3
@@ -129,6 +131,12 @@ packages:
 
   /@types/mime/3.0.1:
     resolution: {integrity: sha512-Y4XFY5VJAuw0FgAqPNd6NNoV44jbq9Bz2L7Rh/J6jLTiHBSBJa9fxqQIvkIld4GsoDOcCbvzOUAbLPsSKKg+uA==}
+    dev: true
+
+  /@types/mp4frag/0.6.1:
+    resolution: {integrity: sha512-t5VL9dPiMmFwClo4j6tdVUhlflWtC3JKR046u/gOj7cNuCBR2DpmntMteiqOsFK2Ac5pMybShlHrPIPNQTWqKQ==}
+    dependencies:
+      '@types/node': 18.11.4
     dev: true
 
   /@types/node-fetch/2.6.2:

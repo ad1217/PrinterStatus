@@ -9,7 +9,16 @@ export interface StatusMessage extends BaseMessage {
   msg: OctoprintMessage;
 }
 
-export type OctoprintColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'violet' | 'black' | 'white' | 'default';
+export type OctoprintColor =
+  | 'red'
+  | 'orange'
+  | 'yellow'
+  | 'green'
+  | 'blue'
+  | 'violet'
+  | 'black'
+  | 'white'
+  | 'default';
 
 export interface SettingsMessage extends BaseMessage {
   kind: 'settings';

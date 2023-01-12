@@ -5,7 +5,7 @@
     </h3>
     <video-js
       ref="video"
-      class="card-img vjs-fluid"
+      class="card-img vjs-4-3"
       controls
       autoplay
       muted

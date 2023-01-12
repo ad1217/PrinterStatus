@@ -36,8 +36,6 @@ function start_ffmpeg(
     ])
     .noAudio()
     .videoCodec('libx264')
-    .size('640x480')
-    .autopad()
     .videoFilter('hqdn3d')
     .videoFilters(transforms)
     .format('mp4')

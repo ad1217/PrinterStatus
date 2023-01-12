@@ -3,7 +3,17 @@
     <h3 class="card-header" :data-color="color">
       {{ name || 'Unknown' }}
     </h3>
-    <video muted class="card-img webcam" controls autoplay ref="video"></video>
+    <video-js
+      ref="video"
+      class="card-img vjs-fluid"
+      controls
+      autoplay
+      muted
+      preload="auto"
+    >
+      <source :src="`/webcam/${slug}.m3u8`" />
+    </video-js>
+
     <div class="card-body" v-if="status">
       <div>{{ status.state.text }}</div>
       <div>
@@ -44,8 +54,9 @@
 </template>
 
 <script setup lang="ts">
-import Hls from 'hls.js';
-import { computed, onMounted, Ref, ref, watchEffect } from 'vue';
+import videojs from 'video.js';
+import 'video.js/dist/video-js.css';
+import { computed, Ref, ref, watchEffect } from 'vue';
 import prettyMilliseconds from 'pretty-ms';
 
 import { CurrentOrHistoryPayload } from '../types/octoprint';
@@ -63,33 +74,8 @@ export interface Props {
 export type PrinterInfo = Omit<Props, 'slug' | 'now'>;
 
 const props = defineProps<Props>();
+
 const video: Ref<HTMLMediaElement | null> = ref(null);
-
-const hls: Ref<Hls | null> = ref(null);
-
-if (Hls.isSupported()) {
-  hls.value = new Hls({
-    liveDurationInfinity: true,
-    backBufferLength: 30,
-    manifestLoadingTimeOut: 1000,
-    manifestLoadingMaxRetry: 30,
-    manifestLoadingRetryDelay: 500,
-    //debug: true,
-  });
-  hls.value.on(Hls.Events.MEDIA_ATTACHED, () => {
-    hls.value!.loadSource(`/webcam/${props.slug}.m3u8`);
-    hls.value!.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-      video.value?.play();
-      console.log(
-        'manifest loaded, found ' + data.levels.length + ' quality level'
-      );
-    });
-  });
-
-  hls.value.on(Hls.Events.ERROR, (event, data) => {
-    console.log(data);
-  });
-}
 
 function formatDuration(seconds: number): string {
   return prettyMilliseconds(seconds * 1000);
@@ -111,11 +97,12 @@ const lastUpdateString = computed(() => {
 });
 
 watchEffect(() => {
-  console.log(video.value, hls.value);
-  if (hls.value && video.value) {
-    // if hls and video element are valid, bind them together
-    hls.value.attachMedia(video.value);
-    console.log('video and hls.js are now bound together !');
+  if (video.value) {
+    // if video element valid, bind to videojs
+    videojs(video.value, {
+      liveui: true,
+      liveTracker: { trackingThreshold: 0 },
+    });
   }
 });
 </script>
@@ -146,9 +133,5 @@ $bs-colors: ('red', 'orange', 'yellow', 'green', 'blue', 'white');
   &[data-color='black'] {
     color: var(--bs-light);
   }
-}
-
-.webcam {
-  background-color: black;
 }
 </style>

@@ -1,5 +1,9 @@
 {
   "name": "printer_status",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ad1217/PrinterStatus"
+  },
   "version": "0.0.0",
   "type": "module",
   "devDependencies": {

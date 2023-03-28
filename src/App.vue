@@ -18,14 +18,17 @@
         </PrinterCard>
       </div>
     </div>
+    <git-source-corner :href="package_info.repository.url"> </git-source-corner>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, Ref } from 'vue';
+import package_info from '../package.json';
 
 import { Message } from '../types/messages';
 import PrinterCard, { PrinterInfo } from './PrinterCard.vue';
+import GitSourceCorner from './GitSourceCorner.vue';
 
 const printers: Ref<{ [key: string]: PrinterInfo }> = ref({});
 const hasPrinters = computed(() => Object.keys(printers.value).length > 0);

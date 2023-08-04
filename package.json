@@ -7,19 +7,19 @@
   "version": "0.0.0",
   "type": "module",
   "devDependencies": {
-    "@types/video.js": "^7.3.51",
-    "@vitejs/plugin-vue": "^4.1.0",
-    "sass": "^1.60.0",
-    "typescript": "^5.0.2",
-    "vite": "^4.2.1",
-    "vue-tsc": "^1.2.0"
+    "@types/video.js": "^7.3.52",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "sass": "^1.64.2",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.8",
+    "vue-tsc": "^1.8.8"
   },
   "dependencies": {
-    "@popperjs/core": "^2.11.7",
-    "bootstrap": "^5.2.3",
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.1",
     "pretty-ms": "^8.0.0",
-    "video.js": "^7.21.4",
-    "vue": "^3.2.47"
+    "video.js": "^7.21.5",
+    "vue": "^3.3.4"
   },
   "scripts": {
     "start": "pnpm run -r --include-workspace-root --parallel dev",

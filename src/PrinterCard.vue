@@ -3,16 +3,33 @@
     <h3 class="card-header" :data-color="color">
       {{ name || 'Unknown' }}
     </h3>
-    <video-js
-      ref="video"
-      class="card-img vjs-4-3"
-      controls
+    <Player
+      class="card-img"
+      playsinline
       autoplay
+      :autopause="false"
+      aspectRatio="4:3"
       muted
-      preload="auto"
+      ref="player"
     >
-      <source :src="`/webcam/${slug}.m3u8`" />
-    </video-js>
+      <Hls :config="{ liveDurationInfinity: true }">
+        <source
+          :data-src="`/webcam/${slug}.m3u8`"
+          type="application/x-mpegURL"
+        />
+      </Hls>
+      <Ui>
+        <Spinner />
+        <LoadingScreen />
+        <Scrim gradient="up" />
+        <Controls :activeDuration="500" hideOnMouseLeave waitForPlaybackStart>
+          <LiveIndicator />
+          <ControlSpacer />
+          <FullscreenControl />
+        </Controls>
+        <DblClickFullscreen />
+      </Ui>
+    </Player>
 
     <div class="card-body" v-if="status">
       <div>{{ status.state.text }}</div>
@@ -54,8 +71,20 @@
 </template>
 
 <script setup lang="ts">
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
+import {
+  Player,
+  Hls,
+  Ui,
+  Spinner,
+  LoadingScreen,
+  Scrim,
+  DblClickFullscreen,
+  Controls,
+  LiveIndicator,
+  ControlSpacer,
+  FullscreenControl,
+} from '@vime/vue-next';
+import '@vime/core/themes/default.css';
 import { computed, Ref, ref, watchEffect } from 'vue';
 import prettyMilliseconds from 'pretty-ms';
 
@@ -75,8 +104,6 @@ export type PrinterInfo = Omit<Props, 'slug' | 'now'>;
 
 const props = defineProps<Props>();
 
-const video: Ref<HTMLMediaElement | null> = ref(null);
-
 function formatDuration(seconds: number): string {
   return prettyMilliseconds(seconds * 1000);
 }
@@ -93,16 +120,6 @@ const lastUpdateString = computed(() => {
         prettyMilliseconds(elapsed, { compact: true, verbose: true }) + ' ago'
       );
     }
-  }
-});
-
-watchEffect(() => {
-  if (video.value) {
-    // if video element valid, bind to videojs
-    videojs(video.value, {
-      liveui: true,
-      liveTracker: { trackingThreshold: 0 },
-    });
   }
 });
 </script>

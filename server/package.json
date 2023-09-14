@@ -23,7 +23,7 @@
   },
   "scripts": {
     "start": "npm run dev",
-    "dev": "tsx watch ./src/server.ts",
+    "dev": "tsx watch --clear-screen=false ./src/server.ts",
     "build": "tsc",
     "serve": "node dist/server.js"
   }

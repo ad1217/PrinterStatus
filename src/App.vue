@@ -26,7 +26,7 @@
 import { computed, ref, Ref } from 'vue';
 import package_info from '../package.json';
 
-import { Message } from '../types/messages';
+import type { Message } from '../types/messages.js';
 import PrinterCard, { PrinterInfo } from './PrinterCard.vue';
 import GitSourceCorner from './GitSourceCorner.vue';
 

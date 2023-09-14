@@ -59,8 +59,8 @@ import 'video.js/dist/video-js.css';
 import { computed, Ref, ref, watchEffect } from 'vue';
 import prettyMilliseconds from 'pretty-ms';
 
-import { CurrentOrHistoryPayload } from '../types/octoprint';
-import { OctoprintColor } from '../types/messages';
+import type { CurrentOrHistoryPayload } from '../types/octoprint.js';
+import type { OctoprintColor } from '../types/messages.js';
 
 export interface Props {
   slug: string;

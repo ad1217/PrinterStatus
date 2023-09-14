@@ -1,6 +1,6 @@
 import * as Vue from 'vue';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+import './custom-bootstrap.scss';
 import 'bootstrap';
 
 import App from './App.vue';

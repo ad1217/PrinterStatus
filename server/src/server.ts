@@ -74,7 +74,7 @@ app.get('/webcam/init-:printer.mp4', (req, res) => {
   } else res.status(404).send('Not Found: Printer not known or has no webcam.');
 });
 
-app.get('/webcam/:printer([^\\d]+):id(\\d+).m4s', (req, res) => {
+app.get(/^\/webcam\/(?<printer>[^\d]+)(?<id>\d+).m4s$/, (req, res) => {
   const printer: OctoPrintConnection | undefined = octoprintConnections.find(
     (op) => op.slug === req.params.printer
   );

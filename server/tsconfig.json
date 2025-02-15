@@ -1,9 +1,7 @@
 {
+  "extends": "@tsconfig/node22/tsconfig.json",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "target": "es6",
-    "strict": true,
-    "module": "node16",
     "outDir": "dist",
     "experimentalDecorators": true
   }
